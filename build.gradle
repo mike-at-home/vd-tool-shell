@@ -33,48 +33,110 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
+/* makes a single fat jar to run */
 shadowJar {
     archiveBaseName.set('vd-tool')
-    archiveVersion.set('1.0')
     archiveClassifier.set('')
+   /* 
+   archiveVersion.set('1.0')
+
+    */
     manifest {
         attributes 'Main-Class': 'com.android.ide.common.vectordrawable.VdCommandLineTool'
     }
 }
 
-task downloadVectorDrawableTool(type: Download) {
-    src 'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/vector-drawable-tool.tar.gz'
-    dest new File(buildDir, 'vector-drawable-tool.tar.gz')
+
+
+/* copies vd-tool.jar to build/distributions */
+task copyJarToDistributions(type: Copy) {
+    dependsOn(shadowJar, tasks['jar'])
+
+    def outputDir = layout.buildDirectory
+    def fromJar = outputDir.dir("libs").get().file("vd-tool.jar").asFile
+    def toJar = outputDir.dir("distributions").get()
+
+    from fromJar
+    into toJar
 }
 
-task downloadSdkCommon(type: Download) {
-    src 'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/sdk-common.tar.gz'
-    dest new File(buildDir, 'sdk-common.tar.gz')
-}
+/* makes vd-tool.sh as output */
+task createShellScript {
+    dependsOn copyJarToDistributions
 
-task extractVectorDrawableTool(type: Copy) {
-    dependsOn downloadVectorDrawableTool
-    from tarTree(resources.gzip(downloadVectorDrawableTool.dest))
-    into new File(buildDir, 'vector-drawable-tool')
-}
+    def distDir = new File(projectDir, 'build/distributions')
+    def unixScript = new File(distDir, 'vd-tool.sh')
 
-task extractSdkCommon(type: Copy) {
-    dependsOn downloadSdkCommon
-    from tarTree(resources.gzip(downloadSdkCommon.dest))
-    into new File(buildDir, 'sdk-common')
-}
+    onlyIf { !unixScript.exists() }
 
-task copyFiles(type: Copy) {
-    dependsOn extractVectorDrawableTool, extractSdkCommon
+    doLast {
+        distDir.mkdirs()
 
-    from "${buildDir}/vector-drawable-tool/src/main"
-    into 'src/main'
-
-    from "${buildDir}/sdk-common/src/main/java/com/android/ide/common/vectordrawable"
-    into 'src/main/java/com/android/ide/common/vectordrawable'
-
-    from "${buildDir}/sdk-common/src/main/java/com/android/ide/common/util/AssetUtil.java"
-    into 'src/main/java/com/android/ide/common/util'
+        unixScript.text = """#!/bin/bash
+java -jar vd-tool.jar "\$@"
+"""
+        unixScript.setExecutable(true)
+    }
 }
 
 
+def createDownloadAndInstallTask(String url, List<String> pathsToMerge) {
+    def tempDir = layout.buildDirectory
+    // Derive the extractDir from the URL by taking the name after the last slash (before .tar.gz)
+    def fileName = url.split("/").last().replace(".tar.gz", "")
+    def extractDir = tempDir.dir(fileName).get().asFile
+    def tarFile = tempDir.file("${fileName}.tar.gz").get().asFile
+
+    // Task name derivation from the fileName
+    def downloadTaskName = "download-${fileName}"
+    def extractAndCopyTaskName = "extractAndCopy-${fileName}"
+    def untarTaskName = "untar-${fileName}"
+    def installSourcesTaskName = "installSources-${fileName}"
+
+
+    def downloadTask = tasks.create(downloadTaskName, Download) {
+        onlyIf { !tarFile.exists() }
+
+        src url
+        dest tarFile
+    }
+
+    def untarTask = tasks.create(untarTaskName, Copy) {
+        onlyIf { !extractDir.exists() }
+
+        dependsOn downloadTask
+
+        from tarTree(resources.gzip(tarFile))
+        into extractDir
+    }
+
+    def extractAndCopyTask = tasks.create(extractAndCopyTaskName) {
+        dependsOn { untarTask }
+
+        for(def pathToMerge in pathsToMerge) {
+            copy {
+                from "${extractDir}/src/${pathToMerge}"
+                into "src/${pathToMerge}"
+            }
+        }
+    }
+
+    return extractAndCopyTask
+}
+
+afterEvaluate {
+    def toolTask = createDownloadAndInstallTask(
+            'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/vector-drawable-tool.tar.gz',
+            ['main']
+    )
+
+    def sdkTask = createDownloadAndInstallTask(
+            'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/sdk-common.tar.gz',
+            ['main/java/com/android/ide/common/vectordrawable',
+             'main/java/com/android/ide/common/util/AssetUtil.java'
+            ])
+    tasks['compileJava'].dependsOn(toolTask, sdkTask)
+//    shadowJar
+    tasks['build'].dependsOn(createShellScript)
+//    tasks['build'].dependsOn(createShellScript)
+}
