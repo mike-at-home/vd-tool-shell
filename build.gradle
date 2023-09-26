@@ -1,9 +1,10 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
     dependencies {
+        classpath 'de.undercouch:gradle-download-task:4.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10" // Use the latest version
     }
 }
@@ -12,12 +13,13 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+apply plugin: 'base'
+apply plugin: 'de.undercouch.download'
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
-    jcenter()
     mavenCentral()
     google()
 }
@@ -38,6 +40,41 @@ shadowJar {
     manifest {
         attributes 'Main-Class': 'com.android.ide.common.vectordrawable.VdCommandLineTool'
     }
+}
+
+task downloadVectorDrawableTool(type: Download) {
+    src 'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/vector-drawable-tool.tar.gz'
+    dest new File(buildDir, 'vector-drawable-tool.tar.gz')
+}
+
+task downloadSdkCommon(type: Download) {
+    src 'https://android.googlesource.com/platform/tools/base/+archive/refs/heads/mirror-goog-studio-main/sdk-common.tar.gz'
+    dest new File(buildDir, 'sdk-common.tar.gz')
+}
+
+task extractVectorDrawableTool(type: Copy) {
+    dependsOn downloadVectorDrawableTool
+    from tarTree(resources.gzip(downloadVectorDrawableTool.dest))
+    into new File(buildDir, 'vector-drawable-tool')
+}
+
+task extractSdkCommon(type: Copy) {
+    dependsOn downloadSdkCommon
+    from tarTree(resources.gzip(downloadSdkCommon.dest))
+    into new File(buildDir, 'sdk-common')
+}
+
+task copyFiles(type: Copy) {
+    dependsOn extractVectorDrawableTool, extractSdkCommon
+
+    from "${buildDir}/vector-drawable-tool/src/main"
+    into 'src/main'
+
+    from "${buildDir}/sdk-common/src/main/java/com/android/ide/common/vectordrawable"
+    into 'src/main/java/com/android/ide/common/vectordrawable'
+
+    from "${buildDir}/sdk-common/src/main/java/com/android/ide/common/util/AssetUtil.java"
+    into 'src/main/java/com/android/ide/common/util'
 }
 
 
