@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$rootDir/gradle/dependencies.gradle"
+apply from: "$rootDir/gradle/dependencyInjection.gradle"
+
+android {
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        compileSdkVersion androidVersions.compileSdkVersion
+        versionCode 1
+        versionName "1.0.0"
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    /**
+     * These are disabled for build performance reasons as they do not apply most apps,
+     * expected that certain Android apps will need to enabled features like viewBinding
+     * - for that case add `buildFeatures { viewBinding true }` to that specific app module.
+     */
+    buildFeatures {
+        viewBinding = false
+        aidl = false
+        renderScript = false
+        shaders = false
+        resValues = false
+        buildConfig = false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+
+}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+    // include lint projects by default for all application modules
+    implementation project(":lint:design-systems:raw-resources-lint-packaging")
+}

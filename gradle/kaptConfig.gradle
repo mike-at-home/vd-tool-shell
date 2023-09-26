@@ -1,0 +1,31 @@
+apply plugin: 'kotlin-kapt'
+
+kapt {
+    useBuildCache = true
+    correctErrorTypes = true
+}
+
+afterEvaluate {
+    /**
+     * This turns off gradle tasks like kaptTest, kaptAndroidTest and others that are not defined in the current configuration
+     */
+    def isKaptTestOn = false
+    def isKaptAndroidTestOn = false
+    configurations.each {
+        if (it.name == "kaptTest" && !it.dependencies.isEmpty()) {
+            isKaptTestOn = true
+        } else if (it.name == "kaptAndroidTest" && !it.dependencies.isEmpty()) {
+            isKaptAndroidTestOn = true
+        }
+    }
+
+    tasks.matching { task ->
+        task.name.startsWith("kapt") && task.name.endsWith("TestKotlin")
+    }.configureEach { task ->
+        if (task.name.endsWith("AndroidTestKotlin")) {
+            task.setEnabled(isKaptAndroidTestOn)
+        } else if (task.name.endsWith("TestKotlin")) {
+            task.setEnabled(isKaptTestOn)
+        }
+    }
+}

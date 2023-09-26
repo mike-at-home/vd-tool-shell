@@ -1,0 +1,51 @@
+apply plugin: 'jacoco'
+
+project.afterEvaluate { project ->
+    setupCoverageReporting()
+}
+
+def setupCoverageReporting() {
+    tasks.withType(Test).configureEach {
+        // For Robolectric
+        jacoco.includeNoLocationClasses = true
+        // For Robolectric
+        jacoco.excludes = ['jdk.internal.*']
+    }
+
+    def buildTypes = ["debug"]
+    buildTypes.each { buildType ->
+        def testTaskName = "test${buildType.capitalize()}UnitTest"
+
+        // Create coverage task for each unit test task (e.g. testDebugUnitTestCoverage).
+        task "${testTaskName}Coverage"(type: JacocoReport, dependsOn: "$testTaskName") {
+            group = "Reporting"
+            description = "Generate Jacoco coverage report for the '${buildType.capitalize()}' build type."
+
+            // TODO: figure out how to share this list with jacocoAggregated.gradle.
+            def excludes = [
+                // Views
+                '**/*Fragment.*',
+                '**/*Activity.*',
+            ]
+
+            def kotlinTree = fileTree(dir: "${project.buildDir}/tmp/kotlin-classes/$buildType", excludes: excludes)
+            classDirectories.from = files([kotlinTree])
+
+            def sourceDirs = ["src/main/java", "src/$buildType/java"]
+            sourceDirectories.from = files(sourceDirs)
+
+            // AGP generates the exec file in 1 of 2 locations:
+            // "${project.buildDir}/jacoco/${testTaskName}.exec",
+            // "${project.buildDir}/outputs/unit_test_code_coverage/${buildType}UnitTest/${testTaskName}.exec",
+            // https://issuetracker.google.com/issues/195860510
+            def execTree = fileTree(dir: "${project.buildDir}", includes: ["**/${testTaskName}.exec"])
+            executionData.from = files(execTree)
+
+            reports {
+                csv.required.set(false)
+                xml.required.set(false)
+                html.required.set(true)
+            }
+        }
+    }
+}

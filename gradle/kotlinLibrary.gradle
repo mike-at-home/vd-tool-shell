@@ -1,0 +1,34 @@
+// Sane default settings for kotlin modules
+apply plugin: 'kotlin'
+apply plugin: "com.android.lint"
+
+apply from: "$project.rootDir/gradle/dependencies.gradle"
+apply from: "$project.rootDir/gradle/spotless.gradle"
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    testImplementation "junit:junit:$testing.jUnitVersion"
+}
+
+// Create an alias for the Kotlin module's test task that matches the Android module's test task.
+// This is a hack to include tests from Kotlin modules when running the 'testDebugUnitTest' task from the project root,
+// which is how we validate the build in our CI pipeline.
+task testDebugUnitTest {
+    dependsOn test
+}

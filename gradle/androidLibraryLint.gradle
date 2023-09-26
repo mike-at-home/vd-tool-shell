@@ -1,0 +1,63 @@
+/**
+ * This exists as mostly a copy of androidLibrary.gradle for lint packaging modules to inherit from.
+ * Since we want to apply lint rules to all Android modules by default, lint packaging modules cannot inherit from androidLibrary.gradle
+ */
+apply from: "$project.rootDir/gradle/dependencies.gradle"
+apply from: "$project.rootDir/gradle/spotless.gradle"
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+
+        multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+
+        release {
+            minifyEnabled false
+            def careProviderAppId = '\"' + "$careProviderApplicationId" + '\"'
+            buildConfigField 'String', 'APP_ID', careProviderAppId
+        }
+        dogfood {
+            def careProviderAppId = '\"' + "$careProviderApplicationId" + '\"'
+            buildConfigField 'String', 'APP_ID', careProviderAppId
+        }
+        debug {
+            debuggable true
+            def careProviderAppId = '\"' + "$careProviderApplicationId" + "$careProviderDebugSuffix" +'\"'
+            buildConfigField 'String', 'APP_ID', careProviderAppId
+        }
+        sauce {
+            debuggable true
+            def careProviderAppId = '\"' + "$careProviderApplicationId" + "$careProviderSauceSuffix" +'\"'
+            buildConfigField 'String', 'APP_ID', careProviderAppId
+        }
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$google.coreLibraryDesugaringVersion"
+
+    testImplementation "junit:junit:$testing.jUnitVersion"
+}

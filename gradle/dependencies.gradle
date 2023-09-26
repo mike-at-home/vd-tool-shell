@@ -1,0 +1,124 @@
+// non numbered dependencies / constants to be used throughout gradle
+ext {
+    careProviderApplicationId = "com.joinhonor.careprovider"
+    careProviderDebugSuffix = ".debug"
+    careProviderSauceSuffix = ".sauce"
+}
+
+ext.kotlin = [
+        reflectVersion      : "1.6.20",
+        kotlinSerialization : "1.5.0"
+]
+
+ext.compose = [
+        accompanistVersion      : "0.28.0",
+        activityComposeVersion  : "1.6.0",
+        coilCompose             : "1.4.0",
+        composeVersion          : "1.3.2",
+        composeCompilerVersion  : "1.4.4",
+]
+
+// non dependency versions like version codes & names
+ext.androidVersions = [
+        compileSdkVersion: 33,
+        targetSdkVersion : 33,
+        minSdkVersion    : 23,
+]
+
+// non androidX android dependencies
+ext.google = [
+        composeMaps                  : "2.11.4",
+        coreLibraryDesugaringVersion : "1.1.5",
+        flexboxVersion               : "3.0.0",
+        playServicesBaseVersion      : "18.1.0",
+        playServicesMapsVersion      : "18.1.0",
+        playServicesLocationVersion  : "21.0.0",
+        playServiceMlKitFaceDetection: "17.0.1",
+        ossDependencies              : "17.0.0"
+]
+
+// androidX related dependencies
+ext.androidX = [
+        androidXAnnotationsVersion      : "1.2.0",
+        androidXSqliteVersion           : "2.1.0",
+        androidXActivityVersion         : "1.3.0",
+        androidXFragmentVersion         : "1.5.6",
+        androidXAppCompatVersion        : "1.5.1",
+        androidXSecurityVersion         : "1.1.0-alpha03",
+        androidXCoreVersion             : "1.6.0",
+        androidXTransitionVersion       : "1.4.1",
+        androidXSavedStateVersion       : "1.2.0@aar",
+        appStartup                      : "1.1.1",
+        camera2                         : "1.1.0-beta02",
+        cameraCore                      : "1.1.0-beta02",
+        cameraLifecycle                 : "1.1.0-beta02",
+        cameraView                      : "1.1.0-beta02",
+        constraintLayoutVersion         : "2.0.2",
+        coreKtx                         : "1.7.0",
+        datastore                       : "1.0.0",
+        exifVersion                     : "1.3.3",
+        materialVersion                 : "1.4.0",
+        cardViewVersion                 : "1.0.0",
+        swipeRefreshLayoutVersion       : "1.1.0",
+        gridLayoutVersion               : "1.0.0",
+        multiDexVersion                 : "2.0.1",
+        lifecycleCommonJava8Version     : "2.3.1",
+        lifecycleExtensions             : "2.1.0",
+        lifecycleLiveData               : "2.2.0",
+        lifecycleCompilerVersison       : "2.2.0",
+        lifecycleRuntime                : "2.4.0",
+        lifecycleViewModel              : "2.5.1",
+        recyclerViewVersion             : "1.2.1",
+        preferencesVersion              : "1.1.1",
+
+        androidXEspressoCore            : "3.5.1",
+        androidXTestingCoreVersion      : "2.1.0",
+        androidXTestingCoreVersionForced: "1.4.0",
+        androidxTestingJunitVersion     : "1.1.2",
+        androidxTestingRunnerVersion    : "1.3.0",
+        androidxTestingRulesVersion     : "1.3.0",
+        androidxWorkVersion             : "2.7.1",
+
+        roomTestingVersion              : "2.4.1",
+]
+
+// non androidX third party testing dependencies
+ext.testing = [
+        kotlinCoroutinesTestVersion: "1.6.4",
+        mockkVersion               : "1.12.0",
+        robolectricVersion         : "4.9.2",
+        testRulesVersion           : "1.4.0",
+        jUnitVersion               : "4.13.1",
+        hamcrestCoreVersion        : "1.3",
+        hamcrestVersion            : "2.2",
+        turbineVersion             : "0.9.0",
+]
+
+// firebase
+ext.firebase = [
+        firebaseBom                : "29.2.1",
+]
+
+// misc 3rd party dependencies
+ext.thirdParty = [
+        rxAndroidVersion            : "2.0.2",
+        rxJavaVersion               : "2.2.0",
+        hiltCompilerVersion         : "1.0.0",
+        hiltComposeNavigationVersion: "1.0.0",
+        hiltWorkVersion             : "1.0.0",
+        kotlinCoroutinesVersion     : "1.6.4",
+        kotlinCoroutinesRx2Version  : "1.6.1",
+        kotlinDateTimeVersion       : "0.4.0",
+        coilVersion                 : "2.2.0",
+        flowsLayoutVersion          : "1.10@aar",
+        cardStackViewVersion        : "2.3.4",
+        guavaAndroid                : "27.1-android",
+        guavaJvm                    : "27.1-jre",
+        apacheCommonsVersion        : "3.3.2",
+        leakCanary                  : "2.7",
+        databaseSqlcipher           : "4.5.1",
+        processPhoenix              : "2.1.2",
+        datadog                     : "1.13.0",
+        moshi                       : "1.14.0",
+        segment                     : "1.10.0",
+]

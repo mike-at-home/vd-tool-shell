@@ -1,0 +1,130 @@
+/**
+ * Robolectric has known issues when the tests are executed in parallel.
+ * The issue is mainly around downloading dependencies from multiple processes at runtime.
+ *
+ * https://github.com/robolectric/robolectric/issues/2346
+ * https://github.com/robolectric/robolectric/issues/3580
+ * https://github.com/robolectric/robolectric/issues/5397
+ *
+ * This workaround attempts to fix that issue by downloading Robolectric dependencies at configuration time
+ * instead of at runtime like normal.
+ *
+ * This is accomplished by running Robolectric in offline mode and telling it where the dependencies are located.
+ *
+ * Instructions for updating to a newer version of Robolectric:
+
+ * When a new version of Robolectric is available, often times there will be new jars available to download for runtime that do not match the jars we have defined below.
+ *
+ * This will be surfaced as an error message that might look something like this:
+ *
+ * `java.lang.IllegalArgumentException: Path is not a file: /Users/joeroskopf/Code/HonorAndroid/android-app/build/robolectric/android-all-instrumented-12-robolectric-7732740-i4.jar`
+ *
+ * To address this issue, you will first need to see if we already are bringing in the jar for that version of Android (and if it's the instrumented flavor)
+ * or not. If we are already bringing in the jar for this version of Android, you should just have to update it to the correct version. For example,
+ * with Robolectric 4.7.3, we were already bringing in the following dependency:
+ *
+ * `robo31Instrumented "org.robolectric:android-all-instrumented:12-robolectric-7732740-i3"`
+ *
+ * The error message above is the error message that was output when updating to Robolectric 4.8.1, so the solution is to update that dependency to be
+ * the jar that was output in the error message above.
+ *
+ * `robo31Instrumented "org.robolectric:android-all-instrumented:12-robolectric-7732740-i4"`
+ *
+ * In the scenario where the error message output references a jar that we currently do not bring into the project, the solution is to add it.
+ * This is done by first defining a configuration for that dependency:
+ *
+ * ```
+ * configurations {
+ *     robo16Instrumented
+ *     robo21
+ *     robo31Instrumented
+ *     robo31V2Instrumented // this is the new one that I am adding in this example
+ * }
+ * ```
+ *
+ * We then want to add it to the dependencies closure in this file:
+ *
+ * ```
+ * dependencies {
+ *     robo16Instrumented "org.robolectric:android-all-instrumented:4.1.2_r1-robolectric-r1-i4"
+ *     robo21 "org.robolectric:android-all:5.0.2_r3-robolectric-r0"
+ *     robo31Instrumented "org.robolectric:android-all-instrumented:12-robolectric-7732740-i4"
+ *
+ *     // this is the new dependency being added
+ *     robo31V2Instrumented "org.robolectric:android-all-instrumented:12.1-robolectric-8229987-i4"
+ * }
+ * ```
+ *
+ * and then lastly, add it to the task to download Robolectric dependencies
+ *
+ * ```
+ *
+ * task fetchRobolectricDependencies(type: Copy) {
+ *     from configurations.robo16Instrumented
+ *     from configurations.robo21
+ *     from configurations.robo31Instrumented
+ *     from configurations.robo31V2Instrumented
+ *     into robolectricDependencies
+ * }
+ * ```
+ *
+ * The idea is to rinse and repeat until Robolectric has all of the dependencies it needs. I was unable to find a location in the Robolectric
+ * source code where these dependencies were defined, but you can generally get an idea of what the jars will be by looking here:
+ * https://github.com/robolectric/robolectric/blob/master/buildSrc/src/main/groovy/AndroidSdk.groovy
+ */
+
+configurations {
+    robo16Instrumented
+    robo21
+    robo21Instrumented
+    robo28Instrumented
+    robo29Instrumented
+    robo31
+    robo31Instrumented
+    robo31V2Instrumented
+    robo33Instrumented
+}
+
+dependencies {
+    robo16Instrumented "org.robolectric:android-all-instrumented:4.1.2_r1-robolectric-r1-i4"
+    robo21 "org.robolectric:android-all:5.0.2_r3-robolectric-r0"
+    robo21Instrumented "org.robolectric:android-all-instrumented:5.0.2_r3-robolectric-r0-i4"
+    robo28Instrumented "org.robolectric:android-all-instrumented:9-robolectric-4913185-2-i4"
+    robo29Instrumented "org.robolectric:android-all-instrumented:10-robolectric-5803371-i4"
+    robo31 "org.robolectric:android-all:12-robolectric-7732740"
+    robo31Instrumented "org.robolectric:android-all-instrumented:12-robolectric-7732740-i4"
+    robo31V2Instrumented "org.robolectric:android-all-instrumented:12.1-robolectric-8229987-i4"
+    robo33Instrumented "org.robolectric:android-all-instrumented:13-robolectric-9030017-i4"
+}
+
+def robolectricDependencies = "${rootProject.buildDir.path}/robolectric"
+
+task fetchRobolectricDependencies(type: Copy) {
+    from configurations.robo16Instrumented
+    from configurations.robo21
+    from configurations.robo21Instrumented
+    from configurations.robo28Instrumented
+    from configurations.robo29Instrumented
+    from configurations.robo31
+    from configurations.robo31Instrumented
+    from configurations.robo31V2Instrumented
+    from configurations.robo33Instrumented
+    into robolectricDependencies
+}
+
+subprojects {
+    afterEvaluate {
+        if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
+            android {
+                testOptions.unitTests.all {
+                    systemProperty 'robolectric.offline', 'true'
+                    systemProperty 'robolectric.dependency.dir', robolectricDependencies
+                }
+            }
+
+            tasks.withType(Test).configureEach {
+                it.dependsOn fetchRobolectricDependencies
+            }
+        }
+    }
+}

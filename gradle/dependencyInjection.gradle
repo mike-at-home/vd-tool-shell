@@ -1,0 +1,13 @@
+/**
+ * The basics needed to add DI to your module
+ */
+
+apply from: "$project.rootDir/gradle/kaptConfig.gradle"
+
+dependencies {
+    implementation "com.google.dagger:hilt-core:$hiltVersion"
+    kapt "com.google.dagger:hilt-compiler:$hiltVersion"
+
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-compiler:$hiltVersion"
+}

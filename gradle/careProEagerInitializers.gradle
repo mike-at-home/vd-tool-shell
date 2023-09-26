@@ -1,0 +1,8 @@
+/**
+ * Modules required initialization of the care pro app. When you add a new dependency or initializer
+ * to the care pro app, you must add the module dependency here and add the hilt module to
+ */
+
+dependencies {
+    implementation project(":app:carepro:install-tracking:initialization")
+}

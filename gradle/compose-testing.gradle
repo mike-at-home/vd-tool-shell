@@ -1,0 +1,12 @@
+/**
+ * The basics needed to enable compose testing in your module
+ */
+
+apply from: "$project.rootDir/gradle/dependencies.gradle"
+
+dependencies {
+    testImplementation "androidx.test.espresso:espresso-core:$androidX.androidXEspressoCore"
+    testImplementation "org.robolectric:robolectric:$testing.robolectricVersion"
+    testImplementation "androidx.compose.ui:ui-test-junit4:$compose.composeVersion"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose.composeVersion"
+}

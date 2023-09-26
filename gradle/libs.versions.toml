@@ -1,0 +1,48 @@
+[versions]
+androidXAppCompat = "1.5.1"
+androidXSavedState = "1.2.0@aar"
+androidXTestingCoreVersion = "1.4.0"
+androidXTestingJunitVersion = "1.1.2"
+androidXViewPager2 = "1.0.0"
+googleFlexbox = "3.0.0"
+googleMaterial = "1.4.0"
+hilt = "2.44"
+hiltNavigationCompose = "1.0.0"
+hiltWork = "1.0.0"
+kotlinCoroutinesTest = "1.6.4"
+mockk = "1.12.0"
+reactiveXCoroutines = "1.6.1"
+robolectric = "4.9.2"
+
+[libraries]
+
+# AndroidX
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidXAppCompat" }
+androidx-savedstate = { module = "androidx.savedstate:savedstate", version.ref = "androidXSavedState" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "androidXViewPager2" }
+
+# Google
+google-flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "googleFlexbox" }
+google-material = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
+
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+hilt-navigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+# RxJava
+rx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx2", version = "reactiveXCoroutines" }
+
+# Testing
+androidx-junit-core = { module = "androidx.test:core", version.ref = "androidXTestingCoreVersion" }
+androidx-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "androidXTestingJunitVersion" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinCoroutinesTest" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[bundles]
+
+[plugins]
+# Note: plugins aren't easily supported in groovy scripts: https://github.com/gradle/gradle/issues/20084
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

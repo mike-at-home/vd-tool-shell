@@ -1,0 +1,50 @@
+apply plugin: 'jacoco'
+
+/**
+ * This task will be defined in the root (android-app) project.
+ * To run, execute the following commands from the project root directory:
+ *
+ * ./gradlew testDebugUnitTest
+ * ./gradlew debugUnitTestCoverage
+ *
+ * Coverage reports can be viewed by opening the following file in a browser:
+ *
+ * <root>/build/reports/debugUnitTestCoverage/html/index.html
+ */
+// TODO: figure out how to set up a dependency on the root unit test task (testDebugUnitTest)
+task debugUnitTestCoverage(type: JacocoReport) {
+    group = "Reporting"
+    description = "Generate an aggregated Jacoco coverage report across all modules for the 'debug' build type."
+
+    // TODO: figure out how to share this list with jacoco.gradle.
+    def excludes = [
+            // Views
+            '**/*Fragment.*',
+            '**/*Activity.*',
+    ]
+
+    def kotlinClassPaths = subprojects.collect { proj ->
+        "${proj.buildDir}/tmp/kotlin-classes/debug"
+    }
+    def kotlinClassFileTrees = kotlinClassPaths.collect { path ->
+        fileTree(dir: path, excludes: excludes)
+    }
+    classDirectories.from = files([kotlinClassFileTrees])
+
+    def sourcePaths = subprojects.collect { proj ->
+        ["${proj.projectDir}/src/main/java", "${proj.projectDir}/src/main/kotlin"]
+    }.flatten()
+    sourceDirectories.from = files(sourcePaths)
+
+    def execTrees = subprojects.collect { proj ->
+        fileTree(dir: "${proj.buildDir}", includes: ["**/testDebugUnitTest.exec"])
+    }
+
+    executionData.from = files(execTrees)
+
+    reports {
+        csv.required.set(false)
+        xml.required.set(false)
+        html.required.set(true)
+    }
+}
