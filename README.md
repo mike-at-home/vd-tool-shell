@@ -16,4 +16,5 @@ At some point, build.gradle may need to be updated to:
 * (hopefully not) preprocess downloaded source files to remove or edit dependencies
 
 ## Notes
-`src` purposefully is empty
+* `src` purposefully is empty
+* I am not an Android engineer - some of the things here might be done in an unorthodox way. Happy to hear feedback.
